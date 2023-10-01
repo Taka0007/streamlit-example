@@ -12,7 +12,8 @@ import json
 import requests
 
 # GitHubのJSONファイルのURL
-github_url = "https://github.com/Taka0007/streamlit-example/blob/master/data/songs.json"
+# rowファイルじゃないとダメ
+github_url = "https://raw.githubusercontent.com/Taka0007/streamlit-example/master/data/songs.json"
 
 # JSONデータをGitHubから読み込む
 response = requests.get(github_url)
