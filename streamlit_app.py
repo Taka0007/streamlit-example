@@ -17,6 +17,15 @@ In the meantime, below is an example of what you can do with just a few lines of
 
 import streamlit as st
 import json
+import pandas as pd
+from streamlit import session_state
+
+# セッションの状態を初期化
+if "data" not in st.session_state:
+    st.session_state.data = []
+
+# サイドバーにページ切り替えを追加
+page = st.sidebar.selectbox("アプリのページ", ["カラオケ曲一覧", "カラオケ曲追加"])
 
 # カラオケ曲のダミーデータ（JSON形式）
 karaoke_data = {
@@ -48,43 +57,57 @@ karaoke_data = {
     ]
 }
 
-# Streamlitアプリの設定
-st.title("カラオケ曲の推薦アプリ")
+# カラオケ曲をJSONファイルに保存
+with open('karaoke_data.json', 'w') as file:
+    json.dump(karaoke_data, file, ensure_ascii=False, indent=4)
 
-# ダミーデータを表示
-st.write("カラオケ曲一覧:")
-for song in karaoke_data["songs"]:
-    st.write(f"曲名: {song['title']}")
-    st.write(f"アーティスト: {song['artist']}")
-    st.write(f"ジャンル: {song['genre']}")
-    st.write(f"評価: {song['rating']}")
-    st.write("---")
+# カラオケ曲をJSONファイルから読み込む
+with open('karaoke_data.json', 'r') as file:
+    karaoke_data = json.load(file)
 
-# 以下は追加の機能を組み込む部分です
-# 1. フィルタリング機能
-genre_filter = st.selectbox("ジャンルを選択して曲をフィルタリング", ["ジャンル1", "ジャンル2"])
-filtered_songs = [song for song in karaoke_data["songs"] if song["genre"] == genre_filter]
+# カラオケ曲一覧のページ
+if page == "カラオケ曲一覧":
+    st.title("カラオケ曲の推薦アプリ")
 
-if filtered_songs:
-    st.write(f"{genre_filter} の曲一覧:")
-    for song in filtered_songs:
+    # ダミーデータを表示
+    st.write("カラオケ曲一覧:")
+    for song in karaoke_data["songs"]:
         st.write(f"曲名: {song['title']}")
         st.write(f"アーティスト: {song['artist']}")
+        st.write(f"ジャンル: {song['genre']}")
         st.write(f"評価: {song['rating']}")
         st.write("---")
-else:
-    st.write("該当する曲がありません。")
 
-# 2. ソート機能
-sort_option = st.radio("曲を評価でソート", ["昇順", "降順"])
-if sort_option == "昇順":
-    sorted_songs = sorted(karaoke_data["songs"], key=lambda x: x["rating"])
-else:
-    sorted_songs = sorted(karaoke_data["songs"], key=lambda x: x["rating"], reverse=True)
+# カラオケ曲追加のページ
+elif page == "カラオケ曲追加":
+    st.title("カラオケ曲追加")
 
-st.write("ソートされた曲一覧:")
-for song in sorted_songs:
-    st.write(f"曲名: {song['title']}")
-    st.write(f"アーティスト: {song['artist']}")
-    st.write(f"評価: {song['rating']}")
-    st.write("---")
+    # 新しい曲の情報を入力
+    new_title = st.text_input("曲名")
+    new_artist = st.text_input("アーティスト")
+    new_genre = st.text_input("ジャンル")
+    new_rating = st.slider("評価", 0.0, 5.0, 2.5, 0.1)
+
+    # 追加ボタンを押して新しい曲を追加
+    if st.button("曲を追加"):
+        new_song = {
+            "title": new_title,
+            "artist": new_artist,
+            "genre": new_genre,
+            "rating": new_rating
+        }
+        karaoke_data["songs"].append(new_song)
+
+        # カラオケ曲をJSONファイルに上書き保存
+        with open('karaoke_data.json', 'w') as file:
+            json.dump(karaoke_data, file, ensure_ascii=False, indent=4)
+        st.session_state.data.append(new_song)
+
+    # 追加した曲の一覧を表示
+    st.write("追加された曲:")
+    for song in st.session_state.data:
+        st.write(f"曲名: {song['title']}")
+        st.write(f"アーティスト: {song['artist']}")
+        st.write(f"ジャンル: {song['genre']}")
+        st.write(f"評価: {song['rating']}")
+        st.write("---")
