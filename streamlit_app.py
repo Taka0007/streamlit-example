@@ -4,28 +4,8 @@ import math
 import pandas as pd
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
-
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
-
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
-
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
-
 import streamlit as st
 import json
-import pandas as pd
-from streamlit import session_state
-
-# セッションの状態を初期化
-if "data" not in st.session_state:
-    st.session_state.data = []
-
-# サイドバーにページ切り替えを追加
-page = st.sidebar.selectbox("アプリのページ", ["カラオケ曲一覧", "カラオケ曲追加"])
 
 # カラオケ曲のダミーデータ（JSON形式）
 karaoke_data = {
@@ -65,6 +45,9 @@ with open('karaoke_data.json', 'w') as file:
 with open('karaoke_data.json', 'r') as file:
     karaoke_data = json.load(file)
 
+# サイドバーにページ切り替えを追加
+page = st.sidebar.selectbox("アプリのページ", ["カラオケ曲一覧", "カラオケ曲追加"])
+
 # カラオケ曲一覧のページ
 if page == "カラオケ曲一覧":
     st.title("カラオケ曲の推薦アプリ")
@@ -101,13 +84,7 @@ elif page == "カラオケ曲追加":
         # カラオケ曲をJSONファイルに上書き保存
         with open('karaoke_data.json', 'w') as file:
             json.dump(karaoke_data, file, ensure_ascii=False, indent=4)
-        st.session_state.data.append(new_song)
 
-    # 追加した曲の一覧を表示
-    st.write("追加された曲:")
-    for song in st.session_state.data:
-        st.write(f"曲名: {song['title']}")
-        st.write(f"アーティスト: {song['artist']}")
-        st.write(f"ジャンル: {song['genre']}")
-        st.write(f"評価: {song['rating']}")
-        st.write("---")
+        # 追加した曲の確認メッセージ
+        st.write(f"曲 '{new_title}' が追加されました！")
+
