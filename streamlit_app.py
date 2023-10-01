@@ -7,43 +7,19 @@ import streamlit as st
 import streamlit as st
 import json
 
-# カラオケ曲のダミーデータ（JSON形式）
-karaoke_data = {
-    "songs": [
-        {
-            "title": "曲名1",
-            "artist": "アーティスト1",
-            "genre": "ジャンル1",
-            "rating": 4.5
-        },
-        {
-            "title": "曲名2",
-            "artist": "アーティスト2",
-            "genre": "ジャンル2",
-            "rating": 4.0
-        },
-        {
-            "title": "曲名3",
-            "artist": "アーティスト3",
-            "genre": "ジャンル1",
-            "rating": 4.2
-        },
-        {
-            "title": "曲名4",
-            "artist": "アーティスト4",
-            "genre": "ジャンル2",
-            "rating": 3.8
-        }
-    ]
-}
+import streamlit as st
+import json
+import requests
 
-# カラオケ曲をJSONファイルに保存
-with open('karaoke_data.json', 'w') as file:
-    json.dump(karaoke_data, file, ensure_ascii=False, indent=4)
+# GitHubのJSONファイルのURL
+github_url = "https://github.com/Taka0007/streamlit-example/blob/master/data/songs.json"
 
-# カラオケ曲をJSONファイルから読み込む
-with open('karaoke_data.json', 'r') as file:
-    karaoke_data = json.load(file)
+# JSONデータをGitHubから読み込む
+response = requests.get(github_url)
+if response.status_code == 200:
+    karaoke_data = json.loads(response.text)
+else:
+    st.error("JSONデータを読み込めません。GitHub URLを確認してください。")
 
 # サイドバーにページ切り替えを追加
 page = st.sidebar.selectbox("アプリのページ", ["カラオケ曲一覧", "カラオケ曲追加"])
@@ -52,7 +28,7 @@ page = st.sidebar.selectbox("アプリのページ", ["カラオケ曲一覧", "
 if page == "カラオケ曲一覧":
     st.title("カラオケ曲の推薦アプリ")
 
-    # ダミーデータを表示
+    # カラオケ曲一覧を表示
     st.write("カラオケ曲一覧:")
     for song in karaoke_data["songs"]:
         st.write(f"曲名: {song['title']}")
@@ -81,10 +57,10 @@ elif page == "カラオケ曲追加":
         }
         karaoke_data["songs"].append(new_song)
 
-        # カラオケ曲をJSONファイルに上書き保存
-        with open('karaoke_data.json', 'w') as file:
-            json.dump(karaoke_data, file, ensure_ascii=False, indent=4)
-
-        # 追加した曲の確認メッセージ
-        st.write(f"曲 '{new_title}' が追加されました！")
+        # カラオケ曲をGitHubのJSONファイルに上書き保存
+        response = requests.put(github_url, data=json.dumps(karaoke_data))
+        if response.status_code == 200:
+            st.success(f"曲 '{new_title}' が追加されました！")
+        else:
+            st.error("曲を追加できませんでした。GitHub URLを確認してください。")
 
